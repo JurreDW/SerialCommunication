@@ -12,9 +12,9 @@ using System.Windows.Forms.VisualStyles;
 
 namespace SerialCommunication
 {
-    public partial class Form1 : Form
+    public partial class Form1Jurre : Form
     {
-        public Form1()
+        public Form1Jurre()
         {
             InitializeComponent();
         }

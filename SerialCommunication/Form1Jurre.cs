@@ -223,5 +223,76 @@ namespace SerialCommunication
                 checkBoxDigital4.Checked = false;
             }
         }
+
+        private void trackBarPWM9_Scroll(object sender, EventArgs e)
+        {
+            try
+            {
+                // 1. Controleer of de seriële connectie bestaat én open is
+                if (serialPortArduino != null && serialPortArduino.IsOpen)
+                {
+                    // 2. Haal de waarde uit de trackbar
+                    int value = trackBarPWM9.Value;
+
+                    // 3. Bouw het commando
+                    string command = $"set pwm9 {value}";
+
+                    // 4. Verstuur het commando
+                    serialPortArduino.WriteLine(command);
+                }
+                else
+                {
+                    MessageBox.Show("Geen seriële verbinding met de Arduino.");
+                }
+            }
+            catch (Exception ex)
+            {
+                // 5. Foutafhandeling
+                MessageBox.Show($"Fout bij het versturen van PWM9-waarde: {ex.Message}");
+
+            }
+        }
+
+        private void trackBarPWM10_Scroll(object sender, EventArgs e)
+        {
+            try
+            {
+                if (serialPortArduino != null && serialPortArduino.IsOpen)
+                {
+                    int value = trackBarPWM10.Value;
+                    string command = $"set pwm10 {value}";
+                    serialPortArduino.WriteLine(command);
+                }
+                else
+                {
+                    MessageBox.Show("Geen seriële verbinding met de Arduino.");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Fout bij het versturen van PWM10-waarde: {ex.Message}");
+            }
+        }
+
+        private void trackBarPWM11_Scroll(object sender, EventArgs e)
+        {
+            try
+            {
+                if (serialPortArduino != null && serialPortArduino.IsOpen)
+                {
+                    int value = trackBarPWM11.Value;
+                    string command = $"set pwm11 {value}";
+                    serialPortArduino.WriteLine(command);
+                }
+                else
+                {
+                    MessageBox.Show("Geen seriële verbinding met de Arduino.");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Fout bij het versturen van PWM11-waarde: {ex.Message}");
+            }
+        }
     }
 }

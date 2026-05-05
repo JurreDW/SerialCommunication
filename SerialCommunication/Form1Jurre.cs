@@ -14,6 +14,8 @@ namespace SerialCommunication
 {
     public partial class Form1Jurre : Form
     {
+        private SerialPort serialPortArduino;
+
         public Form1Jurre()
         {
             InitializeComponent();
@@ -23,12 +25,19 @@ namespace SerialCommunication
         {
             try
             {
+                serialPortArduino = new SerialPort();
+                serialPortArduino.ReadTimeout = 1000;
+                serialPortArduino.WriteTimeout = 1000;
+
                 string[] portNames = SerialPort.GetPortNames().Distinct().ToArray();
                 comboBoxPoort.Items.Clear();
                 comboBoxPoort.Items.AddRange(portNames);
                 if (comboBoxPoort.Items.Count > 0) comboBoxPoort.SelectedIndex = 0;
 
                 comboBoxBaudrate.SelectedIndex = comboBoxBaudrate.Items.IndexOf("115200");
+
+                buttonConnect.BackColor = Color.Blue;
+                buttonConnect.ForeColor = Color.White;
             }
             catch (Exception)
             { }
@@ -54,50 +63,67 @@ namespace SerialCommunication
 
         private void buttonConnect_Click(object sender, EventArgs e)
         {
-            try
+            if (serialPortArduino.IsOpen)
             {
-                if (serialPortArduino.IsOpen)
+                try
                 {
-                    // ik he een verbinding -> de gebruiker wil deze verbreken 
+                    serialPortArduino.Close();
+                    radioButtonVerbonden.Checked = false;
+                    buttonConnect.Text = "Connect";
                 }
-                else
+                catch (Exception ex)
                 {
-                    // ik heb geen verbinding -> de gebruiker wil deze maken
-                    serialPortArduino.PortName = (string)comboBoxPoort.SelectedItem;
-                    serialPortArduino.BaudRate = Int32.Parse((string)comboBoxBaudrate.SelectedItem);
+                    MessageBox.Show("Error closing port: " + ex.Message);
+                }
+            }
+            else
+            {
+                try
+                {
+                    serialPortArduino.PortName = comboBoxPoort.SelectedItem.ToString();
+                    serialPortArduino.BaudRate = int.Parse(comboBoxBaudrate.SelectedItem.ToString());
                     serialPortArduino.DataBits = (int)numericUpDownDatabits.Value;
 
-                    if (radioButtonParityEven.Checked) serialPortArduino.Parity = Parity.Even;
-                    else if (radioButtonParityMark.Checked) serialPortArduino.Parity = Parity.Mark;
-                    else if (radioButtonParityNone.Checked) serialPortArduino.Parity = Parity.None;
-                    else if (radioButtonParityOdd.Checked) serialPortArduino.Parity = Parity.Odd;
-                    else if (radioButtonParitySpace.Checked) serialPortArduino.Parity = Parity.Space;
+                    if (radioButtonParityEven.Checked)
+                        serialPortArduino.Parity = Parity.Even;
+                    else if (radioButtonParityOdd.Checked)
+                        serialPortArduino.Parity = Parity.Odd;
+                    else if (radioButtonParityMark.Checked)
+                        serialPortArduino.Parity = Parity.Mark;
+                    else if (radioButtonParitySpace.Checked)
+                        serialPortArduino.Parity = Parity.Space;
+                    else
+                        serialPortArduino.Parity = Parity.None;
 
-                    if (radioButtonStopbitsNone.Checked) serialPortArduino.StopBits = StopBits.None;
-                    else if (radioButtonStopbitsOne.Checked) serialPortArduino.StopBits = StopBits.One;
-                    else if (radioButtonStopbitsOnePointFive.Checked) serialPortArduino.StopBits = StopBits.OnePointFive;
-                    else if (radioButtonStopbitsTwo.Checked) serialPortArduino.StopBits = StopBits.Two;
+                    if (radioButtonStopbitsTwo.Checked)
+                        serialPortArduino.StopBits = StopBits.Two;
+                    else if (radioButtonStopbitsOnePointFive.Checked)
+                        serialPortArduino.StopBits = StopBits.OnePointFive;
+                    else if (radioButtonStopbitsNone.Checked)
+                        serialPortArduino.StopBits = StopBits.None;
+                    else
+                        serialPortArduino.StopBits = StopBits.One;
 
-                    if (radioButtonHandshakeNone.Checked) serialPortArduino.Handshake = Handshake.None;
-                    else if (radioButtonHandshakeRTS.Checked) serialPortArduino.Handshake = Handshake.RequestToSend;
-                    else if (radioButtonHandshakeRTSXonXoff.Checked) serialPortArduino.Handshake = Handshake.RequestToSendXOnXOff;
-                    else if (radioButtonHandshakeXonXoff.Checked) serialPortArduino.Handshake = Handshake.XOnXOff;
+                    if (radioButtonHandshakeXonXoff.Checked)
+                        serialPortArduino.Handshake = Handshake.XOnXOff;
+                    else if (radioButtonHandshakeRTSXonXoff.Checked)
+                        serialPortArduino.Handshake = Handshake.RequestToSendXOnXOff;
+                    else if (radioButtonHandshakeRTS.Checked)
+                        serialPortArduino.Handshake = Handshake.RequestToSend;
+                    else
+                        serialPortArduino.Handshake = Handshake.None;
 
                     serialPortArduino.RtsEnable = checkBoxRtsEnable.Checked;
                     serialPortArduino.DtrEnable = checkBoxDtrEnable.Checked;
 
                     serialPortArduino.Open();
-                    string commando = "ping";
-                    serialPortArduino.WriteLine(commando);
-                    string antwoord = serialPortArduino.ReadLine();
-
-
-                    24.46
+                    radioButtonVerbonden.Checked = true;
+                    buttonConnect.Text = "Disconnect";
                 }
-            }
-            catch (Exception exception)
-            {
-                labelStatus.Text = "Error: " + exception.Message;
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error opening port: " + ex.Message);
+                }
             }
         }
     }

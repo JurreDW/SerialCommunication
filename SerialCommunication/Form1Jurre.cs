@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
@@ -124,6 +125,102 @@ namespace SerialCommunication
                 {
                     MessageBox.Show("Error opening port: " + ex.Message);
                 }
+            }
+        }
+
+        private void checkBoxDigital2_Checked(object sender, EventArgs e)
+        {
+            try
+            {
+                if (!serialPortArduino.IsOpen)
+                {
+                    MessageBox.Show("Serial port is not open. Please connect first.", "Connection Error");
+                    checkBoxDigital2.Checked = false;
+                    return;
+                }
+
+                string command = checkBoxDigital2.Checked ? "set d2 high" : "set d2 low";
+                serialPortArduino.WriteLine(command);
+             
+            }
+            catch (IOException ex)
+            {
+                MessageBox.Show("IO Error: " + ex.Message);
+                checkBoxDigital2.Checked = false;
+            }
+            catch (TimeoutException ex)
+            {
+                MessageBox.Show("Timeout Error: " + ex.Message);
+                checkBoxDigital2.Checked = false;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message);
+                checkBoxDigital2.Checked = false;
+            }
+        }
+
+        private void checkBoxDigital3_CheckedChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                if (!serialPortArduino.IsOpen)
+                {
+                    MessageBox.Show("Serial port is not open. Please connect first.", "Connection Error");
+                    checkBoxDigital3.Checked = false;
+                    return;
+                }
+
+                string command = checkBoxDigital3.Checked ? "set d3 high" : "set d3 low";
+                serialPortArduino.WriteLine(command);
+
+            }
+            catch (IOException ex)
+            {
+                MessageBox.Show("IO Error: " + ex.Message);
+                checkBoxDigital3.Checked = false;
+            }
+            catch (TimeoutException ex)
+            {
+                MessageBox.Show("Timeout Error: " + ex.Message);
+                checkBoxDigital3.Checked = false;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message);
+                checkBoxDigital3.Checked = false;
+            }
+        }
+
+        private void checkBoxDigital4_CheckedChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                if (!serialPortArduino.IsOpen)
+                {
+                    MessageBox.Show("Serial port is not open. Please connect first.", "Connection Error");
+                    checkBoxDigital4.Checked = false;
+                    return;
+                }
+
+                string command = checkBoxDigital4.Checked ? "set d4 high" : "set d4 low";
+                serialPortArduino.WriteLine(command);
+
+            }
+            catch (IOException ex)
+            {
+                MessageBox.Show("IO Error: " + ex.Message);
+                checkBoxDigital4.Checked = false;
+            }
+            catch (TimeoutException ex)
+            {
+                MessageBox.Show("Timeout Error: " + ex.Message);
+                checkBoxDigital4.Checked = false;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message);
+                checkBoxDigital4.Checked = false;
             }
         }
     }

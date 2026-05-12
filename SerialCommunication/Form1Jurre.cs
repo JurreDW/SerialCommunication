@@ -29,6 +29,9 @@ namespace SerialCommunication
                 serialPortArduino = new SerialPort();
                 serialPortArduino.ReadTimeout = 1000;
                 serialPortArduino.WriteTimeout = 1000;
+                // Attach handlers to detect hardware disconnects and serial errors
+                serialPortArduino.ErrorReceived += SerialPortArduino_ErrorReceived;
+                serialPortArduino.PinChanged += SerialPortArduino_PinChanged;
 
                 string[] portNames = SerialPort.GetPortNames().Distinct().ToArray();
                 comboBoxPoort.Items.Clear();
@@ -119,6 +122,8 @@ namespace SerialCommunication
 
                     serialPortArduino.Open();
                     radioButtonVerbonden.Checked = true;
+                    radioButtonVerbonden.Text = "verbonden";
+                    labelStatus.Text = "Verbonden met Arduino.";
                     buttonConnect.Text = "Disconnect";
                 }
                 catch (Exception ex)
@@ -333,11 +338,7 @@ namespace SerialCommunication
             }
             catch (Exception exeption)
             {
-                labelStatus.Text = "Error: " + exeption.Message;
-                serialPortArduino.Close();
-                radioButtonVerbonden.Checked = false;
-                buttonConnect.Text = "Connect";
-
+                HandleDisconnect("Error: " + exeption.Message);
             }
 
         }
@@ -363,10 +364,7 @@ namespace SerialCommunication
             }
             catch (Exception exeption)
             {
-                labelStatus.Text = "Error: " + exeption.Message;
-                serialPortArduino.Close();
-                radioButtonVerbonden.Checked = false;
-                buttonConnect.Text = "Connect";
+                HandleDisconnect("Error: " + exeption.Message);
             }
         }
 
@@ -444,11 +442,50 @@ namespace SerialCommunication
             }
             catch (Exception exeption)
             {
-                labelStatus.Text = "Error: " + exeption.Message;
-                try { serialPortArduino.Close(); } catch { }
-                radioButtonVerbonden.Checked = false;
-                buttonConnect.Text = "Connect";
+                HandleDisconnect("Error: " + exeption.Message);
             }
+        }
+
+        private void SerialPortArduino_ErrorReceived(object sender, SerialErrorReceivedEventArgs e)
+        {
+            HandleDisconnect("Serial error: " + e.EventType.ToString());
+        }
+
+        private void SerialPortArduino_PinChanged(object sender, SerialPinChangedEventArgs e)
+        {
+            // If the port name is no longer listed by the OS, consider it removed
+            try
+            {
+                if (!string.IsNullOrEmpty(serialPortArduino?.PortName) && !SerialPort.GetPortNames().Contains(serialPortArduino.PortName))
+                {
+                    HandleDisconnect("Port removed");
+                }
+            }
+            catch { }
+        }
+
+        private void HandleDisconnect(string reason = null)
+        {
+            // Close port safely
+            try
+            {
+                if (serialPortArduino != null && serialPortArduino.IsOpen)
+                    serialPortArduino.Close();
+            }
+            catch { }
+
+            Action uiUpdate = () =>
+            {
+                radioButtonVerbonden.Checked = false;
+                radioButtonVerbonden.Text = "disconnet";
+                labelStatus.Text = reason ?? "disconnet";
+                buttonConnect.Text = "Connect";
+            };
+
+            if (this.InvokeRequired)
+                this.BeginInvoke(uiUpdate);
+            else
+                uiUpdate();
         }
     }
 }
